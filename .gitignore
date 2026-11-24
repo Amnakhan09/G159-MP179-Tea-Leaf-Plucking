@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+
+# Generated data and reports
+data/processed/
+reports/*_output.txt
+
+# MLflow generated artifacts
+mlruns/
+mlartifacts/
