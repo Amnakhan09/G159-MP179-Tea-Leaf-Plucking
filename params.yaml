@@ -1,0 +1,82 @@
+
+# MP179 Project Configuration
+
+project:
+  name: "Tea Leaf Plucking Productivity Prediction"
+  id: "MP179"
+  random_state: 42
+
+# Dataset paths
+paths:
+  raw_train: "data/raw/train.csv"
+  raw_later: "data/raw/later.csv"
+  raw_holdout: "data/raw/holdout_features.csv"
+
+  processed_train: "data/processed/train_clean.csv"
+  processed_later: "data/processed/later_clean.csv"
+  processed_holdout: "data/processed/holdout_features_clean.csv"
+
+  model: "models/model.joblib"
+  predictions: "predictions/holdout_predictions.csv"
+
+# Target and feature columns
+data:
+  target: "kg_per_worker"
+  id_column: "record_id"
+  date_column: "date"
+
+  numeric_features:
+    - worker_exp_yr
+    - rain_mm_week
+    - slope_deg
+    - temp_c
+    - bush_age_yr
+    - hours_worked
+
+  categorical_features:
+    - flush
+    - section
+
+# Validation configuration
+validation:
+  test_size: 0.20
+  random_state: 42
+  shuffle: true
+
+# Missing value handling
+preprocessing:
+  numeric_imputation: "median"
+  categorical_imputation: "most_frequent"
+  handle_unknown_categories: "ignore"
+
+# Three initial model configurations
+models:
+
+  linear_regression:
+    estimator: "LinearRegression"
+    params: {}
+
+  random_forest_100:
+    estimator: "RandomForestRegressor"
+    params:
+      n_estimators: 100
+      max_depth: null
+      min_samples_leaf: 1
+      random_state: 42
+      n_jobs: -1
+
+  random_forest_200:
+    estimator: "RandomForestRegressor"
+    params:
+      n_estimators: 200
+      max_depth: 12
+      min_samples_leaf: 2
+      random_state: 42
+      n_jobs: -1
+
+# MLflow configuration
+mlflow:
+  tracking_uri: "sqlite:///mlflow.db"
+  experiment_name: "MP179-Tea-Leaf-Productivity"
+  registered_model_name: "MP179TeaProductivity"
+  model_artifact_path: "model"
