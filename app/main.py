@@ -20,4 +20,19 @@ class PredictionInput(BaseModel):
 
 @app.get("/health")
 def health():
+    MODEL_PATH = Path("models/model.joblib")
+
+@app.post("/predict")
+def predict(data: PredictionInput):
+    if not MODEL_PATH.exists():
+        raise HTTPException(
+            status_code=503,
+            detail="Model not available"
+        )
+
+    model = joblib.load(MODEL_PATH)
+    input_df = pd.DataFrame([data.model_dump()])
+    prediction = model.predict(input_df)[0]
+
+    return {"prediction": float(prediction)}
     return {"status": "ok"}
