@@ -14,10 +14,10 @@ data_issues:
     column: null
 
   unit_mixup:
-    present: true
-    column: rain_mm_week
-    group_value: "Lower Garden"
-    factor: 0.1
+  present: true
+  column: rain_mm_week
+  group_value: "Lower Garden"
+  factor: 10
 
   sentinel_value:
     present: true
