@@ -4,9 +4,21 @@ import joblib
 import pandas as pd
 from pathlib import Path
 from fastapi import HTTPException
+import logging
+import json
+import sys
 
 
 app = FastAPI(title="Tea Leaf Productivity API")
+logger = logging.getLogger("mp179_api")
+logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter("%(message)s"))
+
+logger.handlers.clear()
+logger.addHandler(handler)
+logger.propagate = False
 
 class PredictionInput(BaseModel):
     worker_exp_yr: float
@@ -33,6 +45,11 @@ def predict(data: PredictionInput):
     model = joblib.load(MODEL_PATH)
     input_df = pd.DataFrame([data.model_dump()])
     prediction = model.predict(input_df)[0]
+        logger.info(json.dumps({
+        "event": "prediction",
+        "prediction": float(prediction),
+        "status": "success"
+    }))
 
     return {"prediction": float(prediction)}
     return {"status": "ok"}
