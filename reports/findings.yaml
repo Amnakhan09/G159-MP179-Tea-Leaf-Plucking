@@ -47,8 +47,8 @@ data_issues:
 tracking:
   experiment_name: "MP179-Tea-Leaf-Productivity"
   best_run_id: "6f55162b10ce4cd881774ff1447b42a4"
-  registered_model_name: null
-  champion_version: null
+  registered_model_name: "MP179TeaProductivity"
+  champion_version: 1
 
 monitoring:
   psi:                     # cleaned train.csv vs later.csv, 10 bins
