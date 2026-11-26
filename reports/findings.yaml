@@ -14,17 +14,16 @@ data_issues:
     column: null
 
   unit_mixup:
-  present: true
-  column: rain_mm_week
-  group_value: "Lower Garden"
-  factor: 10
+    present: true
+    column: rain_mm_week
+    group_value: "Lower Garden"
+    factor: 10
 
   sentinel_value:
     present: true
     column: slope_deg
     value: 9999
     count: 39
-
   duplicate_rows:
     present: false
     count: null
