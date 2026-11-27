@@ -5,6 +5,8 @@ metadata:
   name: mp179-svc
 
 spec:
+  type: ClusterIP
+
   selector:
     app: mp179-api
 
@@ -12,5 +14,3 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8000
-
-  type: ClusterIP
