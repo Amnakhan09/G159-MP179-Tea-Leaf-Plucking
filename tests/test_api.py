@@ -17,8 +17,21 @@ sample_input = {
 
 def test_health():
     response = client.get("/health")
+
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
+
+def test_valid_prediction():
+    response = client.post(
+        "/predict", json=sample_input
+    )
+
+    assert response.status_code == 200
+    assert "prediction" in response.json()
+    assert isinstance(
+        response.json()["prediction"], (int, float)
+    )
 
 
 def test_invalid_working_hours():
@@ -26,6 +39,7 @@ def test_invalid_working_hours():
     data["hours_worked"] = 25
 
     response = client.post("/predict", json=data)
+
     assert response.status_code == 422
 
 
@@ -34,4 +48,5 @@ def test_negative_rainfall():
     data["rain_mm_week"] = -10
 
     response = client.post("/predict", json=data)
+
     assert response.status_code == 422
