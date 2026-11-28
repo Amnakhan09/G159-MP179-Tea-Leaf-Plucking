@@ -6,6 +6,7 @@ import pandas as pd
 import yaml
 import mlflow
 import mlflow.sklearn
+import numpy as np
 
 from sklearn.base import clone
 from sklearn.metrics import mean_absolute_error
@@ -133,6 +134,7 @@ def main():
 
         mlflow.log_param("data_sha256", data_sha256)
         mlflow.log_param("later_data_sha256", later_data_sha256)
+
         mlflow.log_param("retraining_signature", retraining_signature)
         mlflow.log_param("model_name", "linear_regression_v2")
         mlflow.log_param("later_training_fraction", 0.70)
@@ -148,32 +150,110 @@ def main():
             name="model",
             serialization_format="cloudpickle"
         )
+        v2_run_id = mlflow.active_run().info.run_id
 
-    joblib.dump(
-        v2_model,
-        model_path.parent / "model_v2.joblib"
+
+       # Register V2 in MLflow
+    model_artifact = config["mlflow"]["model_artifact_path"]
+    v2_model_uri = f"runs:/{v2_run_id}/{model_artifact}"
+
+    existing_versions = client.search_model_versions(
+        f"name='{model_name}'"
     )
 
-    print("\nRETRAINING RESULTS")
-    print("V1 MAE:", round(v1_mae, 4))
-    print("V2 MAE:", round(v2_mae, 4))
-    print("Improvement:", round(improvement, 2), "%")
-    print("V2 model URI:", model_info.model_uri)
+    matching_version = None
 
-   
+    for version in existing_versions:
+        version_run = client.get_run(version.run_id)
 
+        if (
+            version_run.data.params.get("retraining_signature")
+            == retraining_signature
+        ):
+            matching_version = version
+            break
+
+    if matching_version is not None:
+        v2_version = str(matching_version.version)
+        print("Existing V2 registration reused:", v2_version)
+
+    else:
+        version_two_exists = any(
+            str(version.version) == "2"
+            for version in existing_versions
+        )
+
+        if version_two_exists:
+            raise RuntimeError(
+                "Version 2 already exists with a different "
+                "retraining signature. Inspect MLflow first."
+            )
+
+        registered = mlflow.register_model(
+            model_uri=v2_model_uri,
+            name=model_name
+        )
+
+        v2_version = str(registered.version)
+        print("V2 registered:", v2_version)
+
+    if v2_version != "2":
+        raise RuntimeError(
+            f"Expected model version 2, found {v2_version}"
+        )
+
+    # Apply the 12% promotion rule
     if improvement >= 12:
-        print("Decision: Promote V2")
-        selected_model = v2_model
+        decision = "promote"
         selected_version = "2"
     else:
-        print("Decision: Retain V1")
-        selected_model = v1_model
+        decision = "keep"
         selected_version = "1"
 
-  
+    print("\nPROMOTION DECISION")
+    print("V1 MAE:", v1_mae)
+    print("V2 MAE:", v2_mae)
+    print("Improvement:", improvement, "%")
+    print("Decision:", decision)
 
-    print("Selected version:", selected_version)
+    # Update the champion alias
+    client.set_registered_model_alias(
+        name=model_name,
+        alias="champion",
+        version=selected_version
+    )
+
+    champion = client.get_model_version_by_alias(
+        model_name, "champion"
+    )
+
+    print("Champion version:", champion.version)
+
+    # Export the selected champion pipeline
+    champion_uri = f"models:/{model_name}@champion"
+
+    final_model = mlflow.sklearn.load_model(champion_uri)
+
+    joblib.dump(final_model, model_path)
+
+    # Validate exported model against the 250 holdout records
+    holdout_path = (
+        PROJECT_ROOT / config["paths"]["processed_holdout"]
+    )
+
+    holdout = pd.read_csv(holdout_path)
+    predictions = final_model.predict(holdout[features])
+
+    if len(predictions) != 250:
+        raise ValueError("Expected exactly 250 predictions")
+
+    if not np.isfinite(predictions).all():
+        raise ValueError("Invalid holdout predictions")
+
+    print("\nCHAMPION EXPORT SUCCESSFUL")
+    print("Model path:", model_path)
+    print("Holdout records tested:", len(predictions))
+
 
 
 if __name__ == "__main__":
