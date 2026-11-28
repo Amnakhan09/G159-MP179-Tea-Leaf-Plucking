@@ -50,20 +50,25 @@ tracking:
   registered_model_name: "MP179TeaProductivity"
   champion_version: 1
 
+
 monitoring:
-  psi:                     # cleaned train.csv vs later.csv, 10 bins
-    worker_exp_yr: null
-    rain_mm_week: null
-    slope_deg: null
-    temp_c: null
-    bush_age_yr: null
-    hours_worked: null
-  most_drifted_feature: null
-  mae_by_group:            # v1 on later.csv, per value of section
-    'Upper Garden': null
-    'Lower Garden': null
-    'River Side': null
-  worst_served_group: null
-  mae_v1_on_check: null    # v1 on the last 30% of later.csv (by date)
-  mae_v2_on_check: null    # v2 on the same rows
-  decision: null           # promote or keep
+  psi:
+    worker_exp_yr: 0.0395
+    rain_mm_week: 0.0145
+    slope_deg: 0.0319
+    temp_c: 0.0406
+    bush_age_yr: 0.0209
+    hours_worked: 6.6122
+
+  most_drifted_feature: hours_worked
+
+  mae_by_group:
+    'Upper Garden': 16.2264
+    'Lower Garden': 2.9200
+    'River Side': 2.5319
+
+  worst_served_group: 'Upper Garden'
+
+  mae_v1_on_check: null
+  mae_v2_on_check: null
+  decision: null

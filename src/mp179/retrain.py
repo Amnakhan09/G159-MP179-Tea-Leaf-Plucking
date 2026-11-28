@@ -109,10 +109,31 @@ def main():
         raw_train.read_bytes()
     ).hexdigest()
 
+        # Fingerprint the cleaned later dataset
+    later_path = PROJECT_ROOT / config["paths"]["processed_later"]
+
+    later_data_sha256 = hashlib.sha256(
+        later_path.read_bytes()
+    ).hexdigest()
+
+    # Create a signature to identify this retraining dataset
+    signature_text = (
+        data_sha256
+        + later_data_sha256
+        + ",".join(features)
+        + target
+    )
+
+    retraining_signature = hashlib.sha256(
+        signature_text.encode("utf-8")
+    ).hexdigest()
+
     # Track retraining experiment
     with mlflow.start_run(run_name="retraining_v2"):
 
         mlflow.log_param("data_sha256", data_sha256)
+        mlflow.log_param("later_data_sha256", later_data_sha256)
+        mlflow.log_param("retraining_signature", retraining_signature)
         mlflow.log_param("model_name", "linear_regression_v2")
         mlflow.log_param("later_training_fraction", 0.70)
 

@@ -77,7 +77,26 @@ def main():
 
     print("\nSECTION-WISE MAE")
 
-    
+    group_mae = {}
+
+    for section, group in later.groupby("section"):
+
+        section_mae = mean_absolute_error(
+            group[target],
+            group["prediction"]
+        )
+
+        group_mae[section] = float(section_mae)
+
+        print(f"{section}: {section_mae:.4f} kg")
+
+    # Identify the section with the highest MAE
+    worst_served = max(group_mae, key=group_mae.get)
+
+    print("\nWorst-served section:", worst_served)
+
+
+
 
 if __name__ == "__main__":
     main()
