@@ -48,7 +48,7 @@ tracking:
   experiment_name: "MP179-Tea-Leaf-Productivity"
   best_run_id: "6f55162b10ce4cd881774ff1447b42a4"
   registered_model_name: "MP179TeaProductivity"
-  champion_version: 1
+  champion_version: 2
 
 
 monitoring:
@@ -69,6 +69,6 @@ monitoring:
 
   worst_served_group: 'Upper Garden'
 
-  mae_v1_on_check: null
-  mae_v2_on_check: null
-  decision: null
+  mae_v1_on_check:  5.345368424057614
+  mae_v2_on_check: 3.4799919125801743
+  decision: promote
